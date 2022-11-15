@@ -781,8 +781,12 @@ int dw_dma_get_status(const struct device *dev, uint32_t channel,
 	}
 #if CONFIG_DMA_DW_HW_LLI
 	if (!(dw_read(dev_cfg->base, DW_DMA_CHAN_EN) & DW_CHAN(channel))) {
-		LOG_ERR("xrun detected");
-		return -ENODATA;
+		dw_write(dev_cfg->base, DW_DMA_CHAN_EN, DW_CHAN_UNMASK(channel));
+
+		if (!(dw_read(dev_cfg->base, DW_DMA_CHAN_EN) & DW_CHAN(channel))) {
+			LOG_ERR("xrun detected");
+			return -ENODATA;
+		}
 	}
 #endif
 	return 0;
